@@ -1,7 +1,6 @@
 #!/bin/python2
 import os
 from PIL import Image
-from sets import Set
 import csv
 import pickle
 import numpy as np
@@ -14,7 +13,7 @@ def updateAdj():
   # create id list
   with open(filename, 'rb') as csvSrc:
     base = csv.reader(csvSrc, delimiter=';')
-    idList = Set()
+    idList = set()
     n = 0
     for row in base:
       if (n != 0):
@@ -32,10 +31,10 @@ def updateAdj():
         idFrom = int(row[0])
         idTo = int(row[1])
         if(idFrom in idList or idTo in idList):
-          print "yes"
+          print ("yes")
           csvOut.writerow(row)
         else:
-          print "not"
+          print ("not")
       else:
         first = False 
         csvOut.writerow(row)
@@ -57,7 +56,7 @@ class ProvincesBMP:
   def getColors(self, filename=None):
     """Creates a unique table of colors from bmp image"""
     # create a set
-    newProvSet = Set()
+    newProvSet = set()
     counter = 0
     pixels = self.data.getdata()
     for pixel in pixels:
@@ -87,7 +86,7 @@ class ProvincesBMP:
     newColors = {}
     i=0
 
-    palleteFile = open(key+'_pallete.txt','wb')
+    palleteFile = open(key+'_pallete.txt','w')
     palleteW = csv.writer(palleteFile)
     # generate rbg pallete for unique values and saveit
     for val in values:
@@ -118,13 +117,14 @@ class ProvincesBMP:
     
 
   def _swapColors(self, colorMapTable):
+    '''Internal function'''
     data = np.array(self.data)
     red, green, blue = data[:,:,0], data[:,:,1], data[:,:,2]
   
     for pair in colorMapTable:
       cfrom = pair[0]
       cto = pair[1]
-      print(pair)
+      # DEBUG: print(pair)
       mask = (red == cfrom[0]) & (green == cfrom[1]) & (blue == cfrom[2])
       data[:,:,:3][mask] = [cto[0], cto[1], cto[2]]
     
@@ -134,6 +134,10 @@ class ProvincesBMP:
   def save(self,filename):
     self.data.save(filename)
 
+
+#
+# Class for handling positions file
+#
 
 # Main function fixes the csv file that mapfiller tool uses
 # for generation
@@ -147,17 +151,18 @@ class ProvincesData:
       return
 
     else:
-      csvIn = open(filename, 'rb')
+      csvIn = open(filename, 'r')
       data = csv.reader(csvIn, delimiter=';')
-      self.fieldnames = data.next()
+      self.fieldnames = next(data)
 
       # Load whole file into memory and close the file
       data = csv.DictReader(csvIn, delimiter=';', fieldnames=self.fieldnames)
       self.data = []
 
-      # Load each field except first into memory
+      # Load each field except first and empty into memory 
       for row in data:
-        self.data.append(row)
+        if (row['Province ID'] != ''):
+          self.data.append(row)
       
       #print(self.data[0])
       csvIn.close();
@@ -169,7 +174,7 @@ class ProvincesData:
     if (recomputeIds):
       self._recomputeId()
 
-    csvOUT = open(filename, 'wb')
+    csvOUT = open(filename, 'w')
     outdata = csv.DictWriter(csvOUT, delimiter=';', fieldnames=self.fieldnames)
     outdata.writeheader();
     outdata.writerows(self.data)
@@ -200,11 +205,12 @@ class ProvincesData:
 
   def countProvinces(self):
     '''Count the amounts of provinces currently in the file'''
-    return self.data.len
+    return len(self.data)
 
 
   def getColor(self, province):
     '''Return tuple with province color'''
+    print(province['Red'])
     red = int(province['Red'])
     green = int(province['Green'])
     blue = int(province['Blue'])
@@ -213,7 +219,7 @@ class ProvincesData:
   
   def getUniqueValues(self, key):
     '''Returns a Set of all cultures on map'''
-    uniqueVals = Set()
+    uniqueVals = set()
     try:
       self.fieldnames.index(key)
     except ValueError:
@@ -225,7 +231,7 @@ class ProvincesData:
      
 
   def filterByField(self, key, valuesSet):
-    '''Filter the list of provinces with fiels "key" in values set'''
+    '''Filter the list of provinces with fields "key" in values set'''
     temp = []
     try:
       self.fieldnames.index(key)
