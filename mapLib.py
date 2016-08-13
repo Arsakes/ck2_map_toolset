@@ -242,3 +242,33 @@ class ProvincesData:
       if (province[key] in valuesSet):
         temp.append(province)
     self.data = temp
+
+
+  def generateProvSetup(self, filename):
+    '''Since patch 2.5 generate province setup file'''
+    text_file = open(filename, "w")
+    text = ''
+    for province in self.data:
+      pid = province['Province ID']
+      holdings = province['Holdings'].split('_')
+      max_settlements = 0
+      if (len(holdings) > 1):
+        max_settlements = holdings[1]
+      else:
+        max_settlements = holdings[0]
+
+      name = province['Province Name']
+      name = str(name.encode('utf-8').decode('ascii', 'ignore'))
+      name = 'c_' + name.lower().replace(' ', '_').replace("'","")
+
+      # define full output
+      out = pid + ' = { \n'
+      if (int(max_settlements) > 0 ):
+        out += '	title = ' + name + '\n'
+
+      out += '	max_settlements = '+ max_settlements + '\n'
+      out += '}\n'
+      text += out
+
+    text_file.write(text)
+    text_file.close() 
