@@ -4,3 +4,6 @@
 *.pyc
 *.dds
 *.png
+lib*
+grammar.py*
+*~
