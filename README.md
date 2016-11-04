@@ -10,6 +10,9 @@ in various ways.
 Workflow
 ===================
 
+Checkout run.py (preferably)
+Or read below;
+
 1. Create classes and load data
 
   provbmp = ProvincesBMP(...)
